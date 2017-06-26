@@ -1,0 +1,220 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  // Parameter section getting its value assignments from the specified parameter file.
+  // If a parameter file is not specified, the generic settings will be applied.
+  "parameters": {
+    "environmentPrefix": {
+      "type": "string",
+      "defaultValue": "GENERIC",
+      "metadata": {
+        "description": "Unique subnet prefix identifier"
+      }
+    },
+    "tierTag": {
+      "type": "string",
+      "defaultValue": "ENV",
+      "metadata": {
+        "description": "Full environment name for tagging purposes"
+      }
+    },
+    "dnsServerAddresses": {
+        "type": "array",
+        "metadata": {
+            "Description": "The address or address(es) of the DNS server(s) used by the VNet"
+        }
+    },
+    "vnetIPAddressRange": {
+      "type": "string",
+      "defaultValue": "10.10.0.0/16",
+      "metadata": {
+        "description": "Entire VNet IP address range"
+      }
+    },
+    "subnet1IPAddressRange": {
+      "type": "string",
+      "defaultValue": "10.10.1.0/24",
+      "metadata": {
+        "description": "First subnet IP address range"
+      }
+    },
+    "subnet2IPAddressRange": {
+      "type": "string",
+      "defaultValue": "10.10.2.0/24",
+      "metadata": {
+        "description": "Second subnet IP address range"
+      }
+    },
+    "subnet3IPAddressRange": {
+      "type": "string",
+      "defaultValue": "10.10.3.0/24",
+      "metadata": {
+        "description": "Third subnet IP address range"
+      }
+    },
+    "subnet4IPAddressRange": {
+      "type": "string",
+      "defaultValue": "10.10.4.0/24",
+      "metadata": {
+        "description": "Fourth subnet IP address range"
+      }
+    },
+    "subnet5IPAddressRange": {
+      "type": "string",
+      "defaultValue": "10.10.5.0/24",
+      "metadata": {
+        "description": "Fifth subnet IP address range"
+      }
+    },
+    "subnet6IPAddressRange": {
+      "type": "string",
+      "defaultValue": "10.10.6.0/24",
+      "metadata": {
+        "description": "Sixth subnet IP address range"
+      }
+    }        
+  },
+  // Take passed parameters and construct unique environment names and assign to variables
+  "variables": {
+    //"apiVersion": "2015-06-15",
+    "vnetName": "[concat(parameters('environmentPrefix'),'-VNET')]",
+    "subnet1Name": "[concat(parameters('environmentPrefix'),'-LBNAT-SUBNET')]",
+    "subnet2Name": "[concat(parameters('environmentPrefix'),'-WEB-SUBNET')]",
+    "subnet3Name": "[concat(parameters('environmentPrefix'),'-APP-SUBNET')]",
+    "subnet4Name": "[concat(parameters('environmentPrefix'),'-DATA-SUBNET')]",
+    "subnet5Name": "[concat(parameters('environmentPrefix'),'-DMZ-SUBNET')]",
+    "subnet6Name": "[concat(parameters('environmentPrefix'),'-MGT-SUBNET')]"
+  },  
+  "resources": [
+    {
+      "apiVersion": "2015-01-01",
+      "name": "linkedTemplate", 
+      "type": "Microsoft.Resources/deployments", 
+      "properties": { 
+        "mode": "Incremental", 
+        "templateLink": {
+          //Update the URI setting to point to the new location for the NSG json file  
+          "uri": "https://nsg.blob.core.windows.net/genaccess/default-nsg.json",
+          "contentVersion": "1.0.0.0"
+        }, 
+        "parameters": { 
+          "environmentPrefix":{"value": "[parameters('environmentPrefix')]"}, 
+          "tierTag":{"value": "[parameters('tierTag')]"}
+        } 
+      } 
+    },
+    {
+      "apiVersion": "2015-01-01",
+      "name": "linkedEA01NSG", 
+      "type": "Microsoft.Resources/deployments", 
+      "properties": { 
+        "mode": "Incremental", 
+        "templateLink": {
+          //Update the URI setting to point to the new location for the NSG json file  
+          "uri": "https://nsg.blob.core.windows.net/genaccess/ea01-nsg.json",
+          "contentVersion": "1.0.0.0"
+        }, 
+        "parameters": { 
+          "environmentPrefix":{"value": "[parameters('environmentPrefix')]"}, 
+          "tierTag":{"value": "[parameters('tierTag')]"}
+        } 
+      } 
+    },    
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[variables('vnetName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "TIER": "[parameters('tierTag')]"
+      },
+      "dependsOn": [
+        "linkedTemplate"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('vnetIPAddressRange')]"    
+          ]
+        },
+        "dhcpOptions": {
+          "dnsServers": "[parameters('dnsServerAddresses')]"
+        },    
+        "subnets": [
+          {
+            "name": "[variables('subnet1Name')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnet1IPAddressRange')]",
+              "tags": {
+                  "TIER": "[parameters('tierTag')]"
+              },
+              "networkSecurityGroup": {
+                "id": "[concat(resourceGroup().id,'/providers/Microsoft.Network/networkSecurityGroups/',parameters('environmentPrefix'),'-NSG-EA01')]"
+              }
+            }
+          },
+          {
+            "name": "[variables('subnet2Name')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnet2IPAddressRange')]",
+              "tags": {
+                  "TIER": "[parameters('tierTag')]"
+              },              
+              "networkSecurityGroup": {
+                "id": "[concat(resourceGroup().id,'/providers/Microsoft.Network/networkSecurityGroups/',parameters('environmentPrefix'),'-NSG-Default')]"
+              }              
+            }
+          },
+          {
+            "name": "[variables('subnet3Name')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnet3IPAddressRange')]",
+              "tags": {
+                  "TIER": "[parameters('tierTag')]"
+              },              
+              "networkSecurityGroup": {
+                "id": "[concat(resourceGroup().id,'/providers/Microsoft.Network/networkSecurityGroups/',parameters('environmentPrefix'),'-NSG-Default')]"
+              }              
+            }
+          },
+          {
+            "name": "[variables('subnet4Name')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnet4IPAddressRange')]",
+              "tags": {
+                  "TIER": "[parameters('tierTag')]"
+              },              
+              "networkSecurityGroup": {
+                "id": "[concat(resourceGroup().id,'/providers/Microsoft.Network/networkSecurityGroups/',parameters('environmentPrefix'),'-NSG-Default')]"
+              }              
+            }
+          },
+          {
+            "name": "[variables('subnet5Name')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnet5IPAddressRange')]",
+              "tags": {
+                  "TIER": "[parameters('tierTag')]"
+              },              
+              "networkSecurityGroup": {
+                "id": "[concat(resourceGroup().id,'/providers/Microsoft.Network/networkSecurityGroups/',parameters('environmentPrefix'),'-NSG-Default')]"
+              }              
+            }
+          },
+          {
+            "name": "[variables('subnet6Name')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnet6IPAddressRange')]",
+              "tags": {
+                  "TIER": "[parameters('tierTag')]"
+              },              
+              "networkSecurityGroup": {
+                "id": "[concat(resourceGroup().id,'/providers/Microsoft.Network/networkSecurityGroups/',parameters('environmentPrefix'),'-NSG-Default')]"
+              }              
+            }
+          }          
+        ]
+      }
+    }    
+  ]
+}
