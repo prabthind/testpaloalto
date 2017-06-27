@@ -140,11 +140,11 @@
         "description": "URL to acquire other VM-Series for Azure templates"
       },
     },
-    "MgmtPublicIPAddressName": {
+    "UntrustPublicIPAddressName": {
       "type": "string",
-      "defaultValue": "vm-servies-pib-mgmt",
+      "defaultValue": "vm-servies-pib-untrust",
       "metadata": {
-        "description": "Name of public IP resource for mgmt interface"
+        "description": "Name of public IP resource for untrust interface"
       }
     },
     "storageAccountName": {
@@ -208,7 +208,6 @@
                 "description": "Type of administrator user authentication "
             },
             "allowedValues": [
-                "sshPublicKey",
                 "password"
             ],
             "defaultValue": "password"
@@ -261,8 +260,8 @@
           "location": {
             "value": "[variables('location')]"
           },
-          "MgmtPublicIPAddressName": {
-            "value": "[concat(parameters('MgmtPublicIPAddressName'),copyindex())]"
+          "UntrustpublicIPAddressName": {
+            "value": "[concat(parameters('UntrustPublicIPAddressName'),copyindex())]"
           },
           "publicIPAddressType": {
             "value": "[variables('publicIPAddressType')]"
@@ -312,8 +311,8 @@
           "virtualNetworkExistingRGName": {
             "value": "[parameters('virtualNetworkExistingRGName')]"
           },
-          "MgmtPublicIPAddressName": {
-            "value": "[concat(parameters('MgmtPublicIPAddressName'), copyindex())]"
+          "UntrustPublicIPAddressName": {
+            "value": "[concat(parameters('UntrustPublicIPAddressName'), copyindex())]"
           },
           "baseUrl": {
             "value": "[parameters('baseUrl')]"
