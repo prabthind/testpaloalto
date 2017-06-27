@@ -5,7 +5,7 @@
     "location": {
       "type": "string"
     },
-    "MgmtPublicIPAddressName": {
+    "UntrustPublicIPAddressName": {
       "type": "string"
     },
     "publicIPAddressType": {
@@ -16,7 +16,7 @@
     }
   },
   "variables": {
-    "mgmt": "[concat('mgmtIP-', parameters('MgmtPublicIPAddressName'))]"
+    "mgmt": "[concat('Untrust-', parameters('UntrustPublicIPAddressName'))]"
   },
   "resources": [
     {
@@ -27,7 +27,7 @@
       "properties": {
         "publicIPAllocationMethod": "[parameters('publicIPAddressType')]",
         "dnsSettings": {
-          "domainNameLabel": "[parameters('MgmtPublicIPAddressName')]"
+          "domainNameLabel": "[parameters('UntrustPublicIPAddressName')]"
         }
       }
     }

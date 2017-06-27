@@ -2,6 +2,12 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "lbName": {
+      "type": "string",
+      "metadata": {
+        "description": "Public Load Balancer name"
+      }
+    },
     "vmCount": {
        "type": "int",
        "defaultValue": 2,
@@ -79,6 +85,13 @@
         "description": "Subnet for Trust"
       }
     },
+    "subnetLBName": {
+      "type": "string",
+      "defaultValue": "UntrustLB",
+      "metadata": {
+        "description": "Subnet for App Gateway"
+      }
+    },
     "subnet0Prefix": {
       "type": "string",
       "defaultValue": "192.168.0.0/24",
@@ -98,6 +111,13 @@
       "defaultValue": "192.168.2.0/24",
       "metadata": {
         "description": "Trust subnet CIDR"
+      }
+    },
+    "subnetLBPrefix": {
+      "type": "string",
+      "defaultValue": "192.168.3.0/24",
+      "metadata": {
+        "description": "App Gateway subnet CIDR"
       }
     },
     "adminUsername": {

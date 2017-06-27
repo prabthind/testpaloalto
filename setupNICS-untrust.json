@@ -11,6 +11,9 @@
     "subnet1Name": {
       "type": "string"
     },
+    "UntrustPublicIPAddressName": {
+      "type": "string"
+    },
     "virtualNetworkName": {
       "type": "string"
     },
@@ -19,8 +22,9 @@
     }
   },
   "variables": {
-      "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
-      "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',parameters('subnet1Name'))]"
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
+    "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',parameters('subnet1Name'))]",
+    "untrustpip": "[concat('untrust-', parameters('UntrustPublicIPAddressName'))]"
   },
   "resources": [
     {
@@ -35,6 +39,9 @@
             "name": "ipconfig-untrust",
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('untrustpip'))]"
+              },
               "subnet": {
                 "id": "[variables('subnet1Ref')]"
               }
